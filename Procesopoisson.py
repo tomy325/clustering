@@ -56,6 +56,8 @@ axs[1].grid(True)
 axs[1].legend()
 
 # Tercer gráfico: Proceso de Poisson con función r(x) variable
+
+
 event_times = []
 current_time = 0
 while current_time < total_time:
