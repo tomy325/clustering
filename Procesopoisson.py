@@ -9,14 +9,14 @@ r_min = 0.5
 r_max = 100
 c = 4
 
-# Función r(x)
-def thinin(t, min=0.5, max=100, c=4):
+# Función r(x) #
+def thinning(t, min=0.5, max=100, c=4): 
     r = ((2 * max - min) / (1 + np.exp(-c * (t - 1)))) + min
     return r
 
-# Función de probabilidad
-def prob(t):
-    h = -0.063 * (t ** 2) + 6
+# Función de intensidad/hazard/riesgo/tasa
+def rate(t):
+    h = 0.063 * (t ** 1) -4*t**2+ 6
     return h
 
 # Crear una figura con tres subplots
@@ -42,7 +42,7 @@ axs[0].legend()
 event_times = []
 current_time = 0
 while current_time < total_time:
-    h = prob(current_time)
+    h = rate(current_time)
     time_until_next_event = np.random.exponential(1 / lambda_rate)
     current_time += time_until_next_event
     if (current_time < total_time and np.random.rand() < h / lambda_rate):
@@ -61,7 +61,7 @@ axs[1].legend()
 event_times = []
 current_time = 0
 while current_time < total_time:
-    h = thinin(current_time)
+    h = thinning(current_time)
     time_until_next_event = np.random.exponential(1 / lambda_rate)
     current_time += time_until_next_event
     if (current_time < total_time and np.random.rand() < h / lambda_rate):
