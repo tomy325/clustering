@@ -1,6 +1,8 @@
 # Librerías
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import norm
+
 
 # Parámetros 
 lambda_rate = 6.01  # tasa de llegada (eventos por unidad de tiempo)
@@ -18,6 +20,12 @@ def thinin(t, min=0.5, max=100, c=4):
 def prob(t):
     h = -0.063 * (t ** 2) + 6
     return h
+
+#densidad de probabilidad gaussiana
+def gauss(t,mu,sigma,v):
+    pdf = norm.pdf(t, mu, sigma/2)
+    kate=pdf*np.sin(2*np.pi*(t/sigma)**v)
+    return kate
 
 # Crear una figura con tres subplots
 fig, axs = plt.subplots(3, 1, figsize=(10, 15), sharex=True, sharey=True)
@@ -56,8 +64,6 @@ axs[1].grid(True)
 axs[1].legend()
 
 # Tercer gráfico: Proceso de Poisson con función r(x) variable
-
-
 event_times = []
 current_time = 0
 while current_time < total_time:
@@ -78,3 +84,22 @@ axs[2].legend()
 # Ajustar el layout y mostrar el gráfico
 plt.tight_layout()
 plt.show()
+
+
+
+##################################################
+
+#ON and OF
+p_on=1
+p_of=-1
+
+# Fast and slow
+l_fast= 0.4
+l_slow= 1
+
+# Transient and sustained
+v_transient= 0.65
+v_sustained= 1.2
+
+
+# ON fast sustained
