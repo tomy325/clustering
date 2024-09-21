@@ -11,14 +11,14 @@ r_min = 0.5
 r_max = 100
 c = 4
 
-# Función r(x)
-def thinin(t, min=0.5, max=100, c=4):
+# Función r(x) #
+def r_function(t, min=0.5, max=100, c=4): 
     r = ((2 * max - min) / (1 + np.exp(-c * (t - 1)))) + min
     return r
 
-# Función de probabilidad
-def prob(t):
-    h = -0.063 * (t ** 2) + 6
+# Función de intensidad/hazard/riesgo/tasa
+def filter_result(t):
+    h = np.sin(2*t)*np.exp(-t**2/4)
     return h
 
 #densidad de probabilidad gaussiana
@@ -50,7 +50,7 @@ axs[0].legend()
 event_times = []
 current_time = 0
 while current_time < total_time:
-    h = prob(current_time)
+    h = r_function(filter_result(current_time))
     time_until_next_event = np.random.exponential(1 / lambda_rate)
     current_time += time_until_next_event
     if (current_time < total_time and np.random.rand() < h / lambda_rate):
@@ -66,8 +66,10 @@ axs[1].legend()
 # Tercer gráfico: Proceso de Poisson con función r(x) variable
 event_times = []
 current_time = 0
+#lambda_rate tiene que ser más grande que el máximo valor posible de r_function 
+lambda_rate = 200 #en caso que r_max = 100
 while current_time < total_time:
-    h = thinin(current_time)
+    h = r_function(filter_result(current_time))
     time_until_next_event = np.random.exponential(1 / lambda_rate)
     current_time += time_until_next_event
     if (current_time < total_time and np.random.rand() < h / lambda_rate):
