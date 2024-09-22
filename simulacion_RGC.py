@@ -18,7 +18,7 @@ def filter_result(t):
     h = np.sin(2*t)*np.exp(-t**2/4)
     return h
 
-#densidad de probabilidad gaussiana
+#linear filter
 def gauss(p,t,mu,sigma,v):
     pdf = norm.pdf(t, mu, sigma/2)
     kate=p*pdf*np.sin(2*np.pi*(t/sigma)**v)
@@ -34,11 +34,11 @@ def estimulo(t):
     if(t>5.5 and t<=7.5):
         return 0
     if(t>7.5 and t<=12.5):
-        return np.sin(np.pi*t**2)
+        return np.sin(np.pi*(t-7.5)**2)
     if(t>12.5 and t<=14.5):
         return 0
     if(t>14.5 and t<=19.5):
-        return 0.2*t*np.sin(3*np.pi*t)
+        return 0.2*(t-14.5)*np.sin(3*np.pi*(t-14.5))
     if(t>19.5 and t<=21.5):
         return 0
 
@@ -104,28 +104,42 @@ estimulo_values = np.array([estimulo(i) for i in t])
 # Realizar la convolución manual
 response = linear_response(gauss_values, estimulo_values)
 
+
+
+
 # Normalizar la respuesta entre -1 y 1
 response_min = np.min(response)
 response_max = np.max(response)
 
 normalized_response = (response - response_min) / (response_max - response_min) * 2 - 1
 
-# Graficar los resultados normalizados
-plt.figure(figsize=(10, 6))
+rate = np.array([r_function(j) for j in normalized_response])
 
-plt.subplot(3, 1, 1)
+# Graficar los resultados normalizados
+plt.figure(figsize=(10, 8))  
+
+# Filtro
+plt.subplot(4, 1, 1)
 plt.plot(t, gauss_values, label='Gaussiana')
 plt.title('Filtro')
 plt.grid(True)
 
-plt.subplot(3, 1, 2)
+# Estimulo
+plt.subplot(4, 1, 2)
 plt.plot(t, estimulo_values, label='Estimulo', color='orange')
-plt.title(' Estimulo')
+plt.title('Estimulo')
 plt.grid(True)
 
-plt.subplot(3, 1, 3)
+# Convolución Normalizada
+plt.subplot(4, 1, 3)
 plt.plot(t, normalized_response, label='Convolución Normalizada', color='green')
-plt.title('linear response normalizada')
+plt.title('Linear response normalizada')
+plt.grid(True)
+
+# Rate 
+plt.subplot(4, 1, 4)
+plt.plot(t, rate, label='Rate(HZ)', color='blue')
+plt.title('Rate(HZ)')
 plt.grid(True)
 
 plt.tight_layout()
