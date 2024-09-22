@@ -4,10 +4,35 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
+#Ajustar parametros para r(x)
 r_min = 0.5
 r_max = 100
 c = 4
 
+
+
+# Parámetros para los ensayos (Spikes)
+num_trials = 100  # Número de ensayos
+dt = 0.001       # Intervalo de tiempo (1 ms)
+
+
+
+
+# Definir todas las combinaciones posibles de parámetros en un diccionario
+filters_params = {
+    'ON_fast_sustained': {'p': 1, 'l': 0.4, 'v': 1.2},
+    'OF_fast_sustained': {'p': -1, 'l': 0.4, 'v': 1.2},
+    'ON_slow_sustained': {'p': 1, 'l': 1, 'v': 1.2},
+    'OF_slow_sustained': {'p': -1, 'l': 1, 'v': 1.2},
+    'ON_fast_transient': {'p': 1, 'l': 0.4, 'v': 0.65},
+    'OF_fast_transient': {'p': -1, 'l': 0.4, 'v': 0.65},
+    'ON_slow_transient': {'p': 1, 'l': 1, 'v': 0.65},
+    'OF_slow_transient': {'p': -1, 'l': 1, 'v': 0.65}
+}
+
+
+
+#Definir funciones
 # Función r(x) #
 def r_function(t, min=0.5, max=100, c=4): 
     r = ((2 * max - min) / (1 + np.exp(-c * (t - 1)))) + min
@@ -52,59 +77,29 @@ def linear_response(f, g):
                 response[n] += f[k] * g[n - k]
     return response
 
-    # ON fast sustained
-p_on=1
-l_fast= 0.4
-v_sustained= 1.2
 
-# OF fast sustained
-p_of=-1
-l_fast= 0.4
-v_sustained= 1.2
-
-# ON slow sustained
-p_on=1
-l_slow= 1
-v_sustained= 1.2
-
-# OF slow sustained\
-p_of=-1
-l_slow= 1
-v_sustained= 1.2
-
-# ON fast transient
-p_on=1
-l_fast= 0.4
-v_transient= 0.65
-
-# OF fast transient
-p_of=-1
-l_fast= 0.4
-v_transient= 0.65
-
-# ON slow transient
-p_on=1
-l_slow= 1
-v_transient= 0.65
-
-# OF slow transient
-p_of=-1
-l_slow= 1
-v_transient= 0.65
 
 
 # Crear un vector de tiempo limitado entre 0 y 21.5
 t = np.linspace(0, 21.5, 1000)  # Aumentar el número de puntos para mayor precisión
 
+
+# Seleccionar el filtro deseado
+selected_filter = 'OF_fast_sustained'  # Cambia esta clave para seleccionar otro filtro
+
+# Obtener los parámetros correspondientes del diccionario
+params = filters_params[selected_filter]
+p = params['p']
+l = params['l']
+v = params['v']
+
 # Evaluar las funciones gauss y estimulo en ese dominio
-gauss_values = gauss(p_on,t, 0, l_fast, v_sustained)  # Parámetros arbitrarios para la gaussiana
+gauss_values = gauss(p,t, 0, l, v)  # Parámetros arbitrarios para la gaussiana
 estimulo_values = np.array([estimulo(i) for i in t])
 
 
 # Realizar la convolución manual
 response = linear_response(gauss_values, estimulo_values)
-
-
 
 
 # Normalizar la respuesta entre -1 y 1
@@ -115,31 +110,58 @@ normalized_response = (response - response_min) / (response_max - response_min) 
 
 rate = np.array([r_function(j) for j in normalized_response])
 
-# Graficar los resultados normalizados
-plt.figure(figsize=(10, 8))  
+
+
+# Crear matriz para almacenar los spikes de cada ensayo
+spike_trains = np.zeros((num_trials, len(t)))
+
+# Simular tren de spikes para cada ensayo
+for trial in range(num_trials):
+    spike_trains[trial] = np.random.rand(len(t)) < rate * dt
+
+
+
+
+
+
+# --- Graficar los resultados ---
+
+plt.figure(figsize=(10, 10))  
 
 # Filtro
-plt.subplot(4, 1, 1)
+plt.subplot(5, 1, 1)
 plt.plot(t, gauss_values, label='Gaussiana')
 plt.title('Filtro')
 plt.grid(True)
 
 # Estimulo
-plt.subplot(4, 1, 2)
+plt.subplot(5, 1, 2)
 plt.plot(t, estimulo_values, label='Estimulo', color='orange')
 plt.title('Estimulo')
 plt.grid(True)
 
 # Convolución Normalizada
-plt.subplot(4, 1, 3)
+plt.subplot(5, 1, 3)
 plt.plot(t, normalized_response, label='Convolución Normalizada', color='green')
 plt.title('Linear response normalizada')
 plt.grid(True)
 
-# Rate 
-plt.subplot(4, 1, 4)
-plt.plot(t, rate, label='Rate(HZ)', color='blue')
-plt.title('Rate(HZ)')
+# Rate (Tasa de disparo)
+plt.subplot(5, 1, 4)
+plt.plot(t, rate, label='Rate (Hz)', color='blue')
+plt.title('Rate (Hz)')
+plt.grid(True)
+
+# Raster Plot con puntos para visualizar los trenes de spikes
+plt.subplot(5, 1, 5)
+for trial in range(num_trials):
+    spike_times = t[spike_trains[trial] == 1]
+    plt.scatter(spike_times, np.ones_like(spike_times) * trial, color='black', s=10)  
+
+plt.xlabel('Time (s)')
+plt.ylabel('Trial')
+plt.title('spikes')
+plt.ylim([-1, num_trials])
 plt.grid(True)
 
 plt.tight_layout()
