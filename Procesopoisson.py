@@ -64,6 +64,8 @@ axs[1].grid(True)
 axs[1].legend()
 
 # Tercer gráfico: Proceso de Poisson con función r(x) variable
+
+
 event_times = []
 current_time = 0
 #lambda_rate tiene que ser más grande que el máximo valor posible de r_function 
