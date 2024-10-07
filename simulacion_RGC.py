@@ -85,7 +85,7 @@ t = np.linspace(0, 21.5, 1000)  # Aumentar el número de puntos para mayor preci
 
 
 # Seleccionar el filtro deseado
-selected_filter = 'OF_fast_sustained'  # Cambia esta clave para seleccionar otro filtro
+selected_filter = 'OF_fast_sustained'  # Ver variable filters_params para ver las opciones posibles
 
 # Obtener los parámetros correspondientes del diccionario
 params = filters_params[selected_filter]
@@ -94,7 +94,7 @@ l = params['l']
 v = params['v']
 
 # Evaluar las funciones gauss y estimulo en ese dominio
-gauss_values = gauss(p,t, 0, l, v)  # Parámetros arbitrarios para la gaussiana
+gauss_values = gauss(p,t, 0, l, v)  
 estimulo_values = np.array([estimulo(i) for i in t])
 
 
@@ -136,19 +136,19 @@ plt.grid(True)
 
 # Estimulo
 plt.subplot(5, 1, 2)
-plt.plot(t, estimulo_values, label='Estimulo', color='orange')
+plt.plot(t, estimulo_values, label='Estimulo', color='red')
 plt.title('Estimulo')
 plt.grid(True)
 
 # Convolución Normalizada
 plt.subplot(5, 1, 3)
-plt.plot(t, normalized_response, label='Convolución Normalizada', color='green')
+plt.plot(t, normalized_response, label='Convolución Normalizada', color='purple')
 plt.title('Linear response normalizada')
 plt.grid(True)
 
 # Rate (Tasa de disparo)
 plt.subplot(5, 1, 4)
-plt.plot(t, rate, label='Rate (Hz)', color='blue')
+plt.plot(t, rate, label='Rate (Hz)', color='green')
 plt.title('Rate (Hz)')
 plt.grid(True)
 

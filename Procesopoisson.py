@@ -1,4 +1,5 @@
 # Librerías
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
@@ -26,6 +27,26 @@ def gauss(t,mu,sigma,v):
     pdf = norm.pdf(t, mu, sigma/2)
     kate=pdf*np.sin(2*np.pi*(t/sigma)**v)
     return kate
+
+def estimulo(t):
+    if(t<=1.5):
+        return 0
+    if(t>1.5 and t<=3.5):
+        return 1
+    if(t>3.5 and t<=5.5):
+        return 0
+    if(t>5.5 and t<=7.5):
+        return 0.5
+    if(t>7.5 and t<=12.5):
+        return np.sin(np.pi*t**2)
+    if(t>12.5 and t<=14.5):
+        return 0.5
+    if(t>14.5 and t<=19.5):
+        return 0.2*t*np.sin(3*np.pi*t)
+    if(t>19.5 and t<=21.5):
+        return 0.5
+    
+
 
 # Crear una figura con tres subplots
 fig, axs = plt.subplots(3, 1, figsize=(10, 15), sharex=True, sharey=True)
@@ -107,3 +128,42 @@ v_sustained= 1.2
 
 
 # ON fast sustained
+p_on=1
+l_fast= 0.4
+v_sustained= 1.2
+
+# OF fast sustained
+p_of=-1
+l_fast= 0.4
+v_sustained= 1.2
+
+# ON slow sustained
+p_on=1
+l_slow= 1
+v_sustained= 1.2
+
+# OF slow sustained\
+p_of=-1
+l_slow= 1
+v_sustained= 1.2
+
+# ON fast transient
+p_on=1
+l_fast= 0.4
+v_transient= 0.65
+
+# OF fast transient
+p_of=-1
+l_fast= 0.4
+v_transient= 0.65
+
+# ON slow transient
+p_on=1
+l_slow= 1
+v_transient= 0.65
+
+# OF slow transient
+p_of=-1
+l_slow= 1
+v_transient= 0.65
+
