@@ -12,7 +12,7 @@ c = 4
 
 
 # Parámetros para los ensayos (Spikes)
-num_trials = 100  # Número de ensayos
+num_trials = 5  # Número de ensayos
 dt = 0.001       # Intervalo de tiempo (1 ms)
 
 

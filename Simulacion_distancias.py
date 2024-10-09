@@ -9,7 +9,7 @@ r_max = 100
 c = 4
 
 # Parámetros para los ensayos (Spikes)
-num_trials_per_filter = 50  # 50 ensayos por filtro
+num_trials_per_filter = 5  # 50 ensayos por filtro
 dt = 0.001  # Intervalo de tiempo (1 ms)
 
 # Definir las combinaciones posibles de parámetros en un diccionario
@@ -105,9 +105,9 @@ def isi_distance(spike_train_1, spike_train_2):
 
     # Asegurarnos de que ambos trenes de picos tienen suficientes ISIs para comparar
     num_intervals = min(len(ISI_1), len(ISI_2))
+
     
     ##################################
-    ### Error!!! Que pasa si es que  un trial tiene 0 spikes?
 
     # Acumular la distancia ISI
     isi_distance_accumulator = 0
@@ -119,12 +119,11 @@ def isi_distance(spike_train_1, spike_train_2):
             isi_distance_accumulator += -((isi_y / isi_x) - 1)
     
     # Promediar la distancia ISI
-    distance = np.abs(isi_distance_accumulator) / num_intervals
-    ###### Se acumulan porque luego para la matriz de distancia hay que promediarlas
+    distance = np.abs(isi_distance_accumulator) 
     return distance
 
 
-def spike_distance(spike_train_1, spike_train_2, t):
+def spike_distance(spike_train_1, spike_train_2):
     """
     Calcula la distancia SPIKE entre dos trenes de picos (spike trains) representados como arreglos binarios (0s y 1s).
     
@@ -143,29 +142,37 @@ def spike_distance(spike_train_1, spike_train_2, t):
     # Obtener los tiempos de picos (índices donde ocurren los "1s")
     spike_times_1 = get_spike_times(spike_train_1)
     spike_times_2 = get_spike_times(spike_train_2)
-    
-    # Encontrar el pico anterior y el siguiente para el tren 1
-    previous_spike_1 = spike_times_1[spike_times_1 < t].max() if any(spike_times_1 < t) else None
-    following_spike_1 = spike_times_1[spike_times_1 > t].min() if any(spike_times_1 > t) else None
-    
-    # Encontrar el pico anterior y el siguiente para el tren 2
-    previous_spike_2 = spike_times_2[spike_times_2 < t].max() if any(spike_times_2 < t) else None
-    following_spike_2 = spike_times_2[spike_times_2 > t].min() if any(spike_times_2 > t) else None
-    
-    # Si no se encuentran picos en alguno de los trenes, no se puede calcular la distancia SPIKE
-    if None in [previous_spike_1, following_spike_1, previous_spike_2, following_spike_2]:
-        return None
-    
-    # Diferencias de tiempos entre picos anteriores y siguientes
-    delta_P = previous_spike_1 - previous_spike_2
-    delta_F = following_spike_1 - following_spike_2
 
-    # Promedio de tiempo hasta el anterior y el siguiente spike
-    avg_previous = (t - previous_spike_1 + t - previous_spike_2) / 2
-    avg_following = (following_spike_1 - t + following_spike_2 - t) / 2
+    spike_times_1 = np.insert(spike_times_1, 0, 0)    
+    spike_times_1 = np.append(spike_times_1, 1000)    
 
-    # Calcular la distancia SPIKE
-    DS = (abs(delta_P) * avg_following + abs(delta_F) * avg_previous) / (avg_previous + avg_following)**2
+    spike_times_2 = np.insert(spike_times_2, 0, 0)   
+    spike_times_2 = np.append(spike_times_2, 1000)
+
+    DS=0
+
+    for t in range(0,1000):
+        # Encontrar el pico anterior y el siguiente para el tren 1
+        previous_spike_1 = spike_times_1[spike_times_1 <= t].max() 
+        following_spike_1 = spike_times_1[spike_times_1 > t].min() 
+    
+        # Encontrar el pico anterior y el siguiente para el tren 2
+        previous_spike_2 = spike_times_2[spike_times_2 <= t].max() 
+        following_spike_2 = spike_times_2[spike_times_2 > t].min()  
+    
+
+    
+        # Diferencias de tiempos entre picos anteriores y siguientes
+        delta_P = previous_spike_1 - previous_spike_2
+        delta_F = following_spike_1 - following_spike_2
+
+        # Promedio de tiempo hasta el anterior y el siguiente spike
+        avg_previous = (t - previous_spike_1 + t - previous_spike_2) / 2
+        avg_following = (following_spike_1 - t + following_spike_2 - t) / 2
+
+        # Calcular la distancia SPIKE
+        DS += (abs(delta_P) * avg_following + abs(delta_F) * avg_previous) / (avg_previous + avg_following)**2
+    DS= DS/1000
     return DS
 
 def compute_distance_matrix(spike_trains):
@@ -185,18 +192,13 @@ def compute_distance_matrix(spike_trains):
     
     for i in range(num_trains):
         for j in range(i + 1, num_trains):  # Solo calculamos la parte superior de la matriz, ya que es simétrica
-            # Usar un punto de tiempo promedio para calcular la distancia SPIKE
-            time_point = (len(spike_trains[i]) + len(spike_trains[j])) / 2
             
             # Calcular las distancias ISI y SPIKE
             isi_dist = isi_distance(spike_trains[i], spike_trains[j])
-            spike_dist = spike_distance(spike_trains[i], spike_trains[j], time_point)
+            spike_dist = spike_distance(spike_trains[i], spike_trains[j])
             
-            # Manejar casos donde una distancia SPIKE no se puede calcular
-            if spike_dist is None:
-                distance_matrix[i, j] = isi_dist  # Si la SPIKE distance no es válida, solo usamos ISI
-            else:
-                distance_matrix[i, j] = (isi_dist + spike_dist) / 2
+
+            distance_matrix[i, j] = (isi_dist + spike_dist) / 2
             
             # Copiar el valor a la parte simétrica inferior de la matriz
             distance_matrix[j, i] = distance_matrix[i, j]
