@@ -90,11 +90,10 @@ for filter_name, params in filters_params.items():
 
     # Simular tren de spikes para cada ensayo
     for trial in range(num_trials_per_filter):
-        spike_times = [0]  # Iniciar la lista de tiempos con 0
+        spike_times = []  # Iniciar la lista de tiempos con 0
         for i in range(len(t)):
             if np.random.rand() < rate[i] / lambda_rate:
                 spike_times.append(t[i])  # Almacenar el tiempo en lugar de la posición
-        spike_times.append(21.5)  # Asegurar que el tiempo 21.5 esté incluido
         spike_data.append(spike_times)  # Añadir los tiempos de este ensayo
 
 # Convertir a DataFrame y guardar en CSV sin la columna de `trial`

@@ -2,40 +2,36 @@ import numpy as np
 import pandas as pd
 
 # Leer los datos del CSV
-data = pd.read_csv("spike_trains.csv")
-# Extraer solo los datos de los trenes de picos (omitimos la columna de etiquetas)
-spike_trains = data.drop(columns=["Filter"]).values
+spike_trains = pd.read_csv("spike_trains.csv")
+
 
 # Obtener el número de trenes de picos
 num_trains = spike_trains.shape[0]
 
-def get_spike_times(spike_train):
-    """
-    Dado un arreglo binario (0s y 1s), devuelve los índices (posiciones) donde hay picos (1s).
-    """
-    return np.where(spike_train == 1)[0]  # Devuelve los índices donde hay "1s" (spikes)
+
 
 def isi_distance(spike_train_1, spike_train_2):
     """
-    Calcula la distancia ISI entre dos trenes de picos (spike trains) representados como arreglos binarios.
+    Calcula la distancia ISI entre dos trenes de picos (spike trains) representados como 
+    arreglos que contienen los tiempos de las ocurrencias de los spikes.
     
     Parameters:
     spike_train_1 : array-like
-        Primer tren de picos (arreglo de 0s y 1s).
+        Primer tren de picos (puede contener valores NA).
     spike_train_2 : array-like
-        Segundo tren de picos (arreglo de 0s y 1s).
+        Segundo tren de picos (puede contener valores NA).
         
     Returns:
     float
         La distancia ISI entre los dos trenes de picos.
     """
-    # Obtener los tiempos (índices) donde ocurren los picos (1s)
-    spike_times_1 = get_spike_times(spike_train_1)
-    spike_times_2 = get_spike_times(spike_train_2)
+
+    
+
     
     # Calcular los intervalos inter-picos (ISI)
-    ISI_1 = np.diff(spike_times_1)  # Diferencias entre tiempos consecutivos de picos
-    ISI_2 = np.diff(spike_times_2)
+    ISI_1 = np.diff(spike_train_1)  # Diferencias entre tiempos consecutivos de picos
+    ISI_2 = np.diff(spike_train_2)
 
     # Asegurarnos de que ambos trenes de picos tienen suficientes ISIs para comparar
     num_intervals = min(len(ISI_1), len(ISI_2))
@@ -72,27 +68,30 @@ def spike_distance(spike_train_1, spike_train_2):
     float
         La distancia SPIKE entre los dos trenes de picos en el tiempo t.
     """
-    N=len(spike_train_1)
-    # Obtener los tiempos de picos (índices donde ocurren los "1s")
-    spike_times_1 = get_spike_times(spike_train_1)
-    spike_times_2 = get_spike_times(spike_train_2)
 
-    spike_times_1 = np.insert(spike_times_1, 0, 0)    
-    spike_times_1 = np.append(spike_times_1, N)    
+        # Agregar 0 al inicio si no está presente
+    if spike_train_1[0] != 0:
+        spike_train_1 = np.insert(spike_train_1, 0, 0)
+    if spike_train_2[0] != 0:
+        spike_train_2 = np.insert(spike_train_2, 0, 0)
 
-    spike_times_2 = np.insert(spike_times_2, 0, 0)   
-    spike_times_2 = np.append(spike_times_2, N)
+    # Agregar 21.5 al final si no está presente
+    if spike_train_1[-1] != 21.5:
+        spike_train_1 = np.append(spike_train_1, 21.5)
+    if spike_train_2[-1] != 21.5:
+        spike_train_2 = np.append(spike_train_2, 21.5)
+
 
     DS=0
 
-    for t in range(0,N):
+    for t in np.linspace(0.000002, 21.488, 1000):
         # Encontrar el pico anterior y el siguiente para el tren 1
-        previous_spike_1 = spike_times_1[spike_times_1 <= t].max() 
-        following_spike_1 = spike_times_1[spike_times_1 > t].min() 
+        previous_spike_1 = spike_train_1[spike_train_1 <= t].max() 
+        following_spike_1 = spike_train_1[spike_train_1 > t].min() 
     
         # Encontrar el pico anterior y el siguiente para el tren 2
-        previous_spike_2 = spike_times_2[spike_times_2 <= t].max() 
-        following_spike_2 = spike_times_2[spike_times_2 > t].min()
+        previous_spike_2 = spike_train_2[spike_train_2 <= t].max() 
+        following_spike_2 = spike_train_2[spike_train_2 > t].min()
 
 
         denominador=(following_spike_1-previous_spike_1+following_spike_2-previous_spike_2)/2  
@@ -118,13 +117,11 @@ def spike_distance(spike_train_1, spike_train_2):
 distance_matrix = np.zeros((num_trains, num_trains))
 
 
-print(get_spike_times(spike_trains[1]))
-"""
-# Calcular la matriz de distancia
+
 for i in range(num_trains):
     for j in range(i + 1, num_trains):  # Solo calculamos la mitad superior
-        isi_dist = isi_distance(spike_trains[i], spike_trains[j])
-        spike_dist = spike_distance(spike_trains[i], spike_trains[j])
+        isi_dist = isi_distance(spike_trains.iloc[i].dropna().to_numpy(), spike_trains.iloc[j].dropna().to_numpy())
+        spike_dist = spike_distance(spike_trains.iloc[i].dropna().to_numpy(), spike_trains.iloc[j].dropna().to_numpy())
         
         # Promedio de las dos distancias
         average_distance = (isi_dist + spike_dist) / 2
@@ -134,4 +131,3 @@ for i in range(num_trains):
 # Guardar la matriz de distancia en un CSV
 distance_df = pd.DataFrame(distance_matrix)
 distance_df.to_csv("distance_matrix.csv", index=False)
-"""
