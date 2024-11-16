@@ -90,12 +90,14 @@ for filter_name, params in filters_params.items():
 
     # Simular tren de spikes para cada ensayo
     for trial in range(num_trials_per_filter):
-        spike_times = []  # Iniciar la lista de tiempos con 0
+        spike_times = [filter_name]  # Iniciar la lista de tiempos con el nombre del filtro
         for i in range(len(t)):
             if np.random.rand() < rate[i] / lambda_rate:
                 spike_times.append(t[i])  # Almacenar el tiempo en lugar de la posición
         spike_data.append(spike_times)  # Añadir los tiempos de este ensayo
 
-# Convertir a DataFrame y guardar en CSV sin la columna de `trial`
-spike_df = pd.DataFrame(spike_data)
+# Convertir a DataFrame y guardar en CSV
+max_spikes = max(len(trial) for trial in spike_data)  # Encontrar el máximo de spikes
+spike_df = pd.DataFrame([trial + [None] * (max_spikes - len(trial)) for trial in spike_data])  # Padding para igualar columnas
+spike_df.columns = ["filter"] + [f"time_{i}" for i in range(1, max_spikes)]  # Nombrar las columnas
 spike_df.to_csv("spike_trains.csv", index=False)

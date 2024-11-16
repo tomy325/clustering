@@ -1,12 +1,12 @@
 import numpy as np
 import pandas as pd
 
-# Leer los datos del CSV
-spike_trains = pd.read_csv("spike_trains.csv")
-
+# Leer los datos del CSV, omitiendo la columna de nombre del filtro
+spike_trains = pd.read_csv("spike_trains.csv").drop(columns=["filter"])
 
 # Obtener el número de trenes de picos
 num_trains = spike_trains.shape[0]
+
 
 
 
@@ -130,4 +130,4 @@ for i in range(num_trains):
 
 # Guardar la matriz de distancia en un CSV
 distance_df = pd.DataFrame(distance_matrix)
-distance_df.to_csv("distance_matrix.csv", index=False)
+distance_df.to_csv("matriz_distancia.csv", index=False)

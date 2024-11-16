@@ -1,12 +1,10 @@
 import matplotlib.pyplot as plt
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
 import numpy as np
-from scipy.cluster.hierarchy import fcluster
+from scipy.cluster.hierarchy import fcluster, linkage, dendrogram
 from scipy.spatial.distance import squareform
-from scipy.cluster.hierarchy import linkage, dendrogram
+import pandas as pd
 
 def silhouette(matriz_distancia, max_clusters=10):
     sil_scores = []
@@ -14,7 +12,7 @@ def silhouette(matriz_distancia, max_clusters=10):
     # Iterar sobre diferentes números de clusters
     for n_clusters in range(2, max_clusters + 1):
         # Aplicar KMeans
-        kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+        kmeans = KMeans(n_clusters=n_clusters, random_state=32)
         cluster_labels = kmeans.fit_predict(matriz_distancia)
         
         # Calcular el índice de Silhouette
@@ -36,7 +34,7 @@ def codo(matriz_distancia, max_clusters=10):
     
     # Iterar sobre diferentes números de clusters
     for n_clusters in range(2, max_clusters + 1):
-        kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+        kmeans = KMeans(n_clusters=n_clusters, random_state=32)
         kmeans.fit(matriz_distancia)
         
         # Guardar la inercia
@@ -69,7 +67,7 @@ def hierarchical(distance_matrix, num_clusters=8,  method='ward'):
     condensed_distance_matrix = squareform(distance_matrix)
     
     # Perform clustering
-    linked = linkage(condensed_distance_matrix, method='ward')
+    linked = linkage(condensed_distance_matrix, method)
     
     # Plot dendrogram
     plt.figure(figsize=(10, 7))
@@ -85,13 +83,13 @@ def hierarchical(distance_matrix, num_clusters=8,  method='ward'):
     return clusters
 
 
-distancia=np.load('matriz_distancia.npy')
+distancia=pd.read_csv('matriz_distancia.csv')
 silhouette(distancia)
 codo(distancia)
 
 
 
-clusters=hierarchical(distancia ,8, 'single')
-clusters=hierarchical(distancia ,8, 'complete') #el complete probablemente sea malo
-clusters=hierarchical(distancia ,8, 'average')
-clusters=hierarchical(distancia ,8, 'ward')
+clusters1=hierarchical(distancia ,8, 'single')
+clusters2=hierarchical(distancia ,8, 'complete') 
+clusters3=hierarchical(distancia ,8, 'average')
+clusters4=hierarchical(distancia ,8, 'ward')
