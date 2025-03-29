@@ -103,11 +103,11 @@ def spike_distance(spike_train_1, spike_train_2):
         delta_F = following_spike_1 - following_spike_2
 
         # Promedio de tiempo hasta el anterior y el siguiente spike
-        avg_previous = (t - previous_spike_1 + t - previous_spike_2) / 2
-        avg_following = (following_spike_1 - t + following_spike_2 - t) / 2
+        inv_avg_previous = 1/((t - previous_spike_1 + t - previous_spike_2) / 2)
+        inv_avg_following = 1/((following_spike_1 - t + following_spike_2 - t) / 2)
 
         # Calcular la distancia SPIKE
-        DS += (abs(delta_P) * avg_following + abs(delta_F) * avg_previous) / denominador**2
+        DS += (abs(delta_P) * inv_avg_following + abs(delta_F) * inv_avg_previous) / denominador**2
     return DS
 
 
