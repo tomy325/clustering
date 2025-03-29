@@ -1,15 +1,17 @@
 import numpy as np
-import pandas as pd  # Para guardar en CSV
+import pandas as pd
 from scipy.stats import norm
+import time  # Para medir el tiempo de ejecución
 
 # Ajustar parámetros para r(x)
 r_min = 0.5
 r_max = 100
 c = 4
 lambda_rate = 200
+times = 1000
 
 # Parámetros para los ensayos (Spikes)
-num_trials_per_filter = 5  # Número de ensayos por filtro
+num_trials_per_filter = 10
 
 # Definir las combinaciones posibles de parámetros en un diccionario
 filters_params = {
@@ -62,10 +64,13 @@ def linear_response(f, g):
     return response
 
 # Crear un vector de tiempo entre 0 y 21.5
-t = np.linspace(0, 21.5, 1000)
+t = np.linspace(0, 21.5, times)
 
 # Lista para almacenar los resultados y etiquetas
 spike_data = []
+
+# Medir el tiempo de inicio
+start_time = time.time()
 
 # Iterar sobre cada filtro en el diccionario
 for filter_name, params in filters_params.items():
@@ -98,6 +103,13 @@ for filter_name, params in filters_params.items():
 
 # Convertir a DataFrame y guardar en CSV
 max_spikes = max(len(trial) for trial in spike_data)  # Encontrar el máximo de spikes
-spike_df = pd.DataFrame([trial + [None] * (max_spikes - len(trial)) for trial in spike_data])  # Padding para igualar columnas
+spike_df = pd.DataFrame([trial + [None] * (max_spikes - len(trial)) for trial in spike_data])  # agregar valores none
 spike_df.columns = ["filter"] + [f"time_{i}" for i in range(1, max_spikes)]  # Nombrar las columnas
 spike_df.to_csv("spike_trains.csv", index=False)
+
+# Medir el tiempo final
+end_time = time.time()
+
+# Mostrar el tiempo de ejecución
+execution_time = end_time - start_time
+print(f"El código tomó {execution_time:.2f} segundos en ejecutarse.")

@@ -16,9 +16,9 @@ def isi_distance(spike_train_1, spike_train_2):
     arreglos que contienen los tiempos de las ocurrencias de los spikes.
     
     Parameters:
-    spike_train_1 : array-like
+    spike_train_1 : 
         Primer tren de picos (puede contener valores NA).
-    spike_train_2 : array-like
+    spike_train_2 :
         Segundo tren de picos (puede contener valores NA).
         
     Returns:
@@ -54,13 +54,13 @@ def isi_distance(spike_train_1, spike_train_2):
 
 def spike_distance(spike_train_1, spike_train_2):
     """
-    Calcula la distancia SPIKE entre dos trenes de picos (spike trains) representados como arreglos binarios (0s y 1s).
+    Calcula la distancia SPIKE entre dos trenes de picos (spike trains) .
     
     Parameters:
-    spike_train_1 : array-like
-        Primer tren de picos (arreglo de 0s y 1s).
-    spike_train_2 : array-like
-        Segundo tren de picos (arreglo de 0s y 1s).
+    spike_train_1 : 
+        Primer tren de picos 
+    spike_train_2 : 
+        Segundo tren de picos
     t : float
         Tiempo en el que calcular la distancia SPIKE.
         
@@ -115,6 +115,8 @@ def spike_distance(spike_train_1, spike_train_2):
 
 # Inicializar la matriz de distancia
 distance_matrix = np.zeros((num_trains, num_trains))
+ISI_matrix = np.zeros((num_trains, num_trains))
+SPIKE_matrix = np.zeros((num_trains, num_trains))
 
 
 
@@ -125,9 +127,24 @@ for i in range(num_trains):
         
         # Promedio de las dos distancias
         average_distance = (isi_dist + spike_dist) / 2
+
+        ISI_matrix[i, j] = isi_dist
+        ISI_matrix[j, i] = isi_dist  # Simetría en la matriz
+
+            
+        SPIKE_matrix[i, j] = spike_dist
+        SPIKE_matrix[j, i] = spike_dist  # Simetría en la matriz
+
         distance_matrix[i, j] = average_distance
         distance_matrix[j, i] = average_distance  # Simetría en la matriz
 
+
+
 # Guardar la matriz de distancia en un CSV
 distance_df = pd.DataFrame(distance_matrix)
+ISI_df=pd.DataFrame(ISI_matrix)
+SPIKE_df=pd.DataFrame(SPIKE_matrix)
+
 distance_df.to_csv("matriz_distancia.csv", index=False)
+ISI_df.to_csv("ISI.csv", index=False)
+SPIKE_df.to_csv("SPIKE.csv", index=False)

@@ -1,0 +1,13 @@
+filter,clusters_mean_isi_spike,clusters_isi,clusters_spike
+ON_fast_sustained,5,7,5
+ON_fast_sustained,5,5,5
+ON_fast_sustained,5,6,5
+ON_fast_sustained,5,4,5
+ON_fast_sustained,5,5,5
+ON_fast_sustained,5,9,8
+ON_fast_sustained,5,7,5
+ON_fast_transient,5,2,5
+ON_fast_transient,5,3,5
+OF_fast_transient,5,6,5
+ON_slow_transient,5,9,5
+ON_slow_transient,5,3,5
