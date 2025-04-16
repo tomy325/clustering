@@ -1,5 +1,9 @@
 import numpy as np
 import pandas as pd
+import time  # Para medir el tiempo de ejecución
+
+
+start_time = time.time()
 
 # Leer los datos del CSV, omitiendo la columna de nombre del filtro
 spike_trains = pd.read_csv("spike_trains.csv").drop(columns=["filter"])
@@ -146,5 +150,12 @@ ISI_df=pd.DataFrame(ISI_matrix)
 SPIKE_df=pd.DataFrame(SPIKE_matrix)
 
 distance_df.to_csv("matriz_distancia.csv", index=False)
-ISI_df.to_csv("ISI.csv", index=False)
-SPIKE_df.to_csv("SPIKE.csv", index=False)
+ISI_df.to_csv("matriz_ISI.csv", index=False)
+SPIKE_df.to_csv("matriz_SPIKE.csv", index=False)
+
+# Medir el tiempo final
+end_time = time.time()
+
+# Mostrar el tiempo de ejecución
+execution_time = end_time - start_time
+print(f"El código tomó {execution_time:.2f} segundos en ejecutarse.")

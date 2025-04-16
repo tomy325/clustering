@@ -16,7 +16,7 @@ times = 1000
 
 
 # Parámetros para los ensayos (Spikes)
-num_trials_per_filter = 10
+num_trials_per_filter = 3
 
 # Definir las combinaciones posibles de parámetros en un diccionario
 filters_params = {

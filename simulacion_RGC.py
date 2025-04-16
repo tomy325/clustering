@@ -2,14 +2,33 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
+
+
+# Nelson-Aalen: esta funcion recibe un spike train (arreglo con los timepos de ocurrencia de los spikes) y calcula el estimador de Nelson
+def nelson(event_times):
+    n = len(event_times)
+    eventos = np.arange(1,n+1)
+ #   H = np.cumsum(1 / eventos)
+    H = eventos
+    return event_times, H
+
+# Suavizado: Esta funcion recibe 
+# t: un arreglo que simula el tiempo 
+# x_conocidos: los tiempos en los que previamente se calculo el estimador
+# y_conocidos: el valor del estimador asociado a ese instante de tiempo
+def suavizado(t, x_conocidos, y_conocidos):
+    return np.interp(t, x_conocidos, y_conocidos)
+
+
+
 # Ajustar parámetros para r(x)
 r_min = 0.5
 r_max = 100
 c = 4
-lambda_rate = 100.25
+lambda_rate = 100.001
 
 # Parámetros para los ensayos (Spikes)
-num_trials = 10  # Número de ensayos
+num_trials = 1 # Número de ensayos
 
 # Definir todas las combinaciones posibles de parámetros en un diccionario
 filters_params = {
@@ -75,54 +94,105 @@ response_max = np.max(response)
 normalized_response = (response - response_min) / (response_max - response_min) * 2 - 1
 rate = np.array([r_function(j, r_min, r_max, c) for j in normalized_response])
 
+
+spike_trains = []
+
+#######realizar cambios
+x=np.random.poisson(lam=21.5*lambda_rate,size=1)
+y=np.random.uniform(low=0,high=21.5,size=x)
+
+print(len(y))
+print(y.min())
+print(y.max())
+
+for trial in range(num_trials):
+    delta=t[1]-t[0]
+    spike_times = []
+    for i in range(0,len(y)):
+        if np.random.rand() < rate[int(y[i]/delta)]/lambda_rate:
+            spike_times.append (t[int(y[i]/delta)])
+    spike_times = np.sort(list(set(spike_times)))  # elimina duplicados
+    spike_trains.append(spike_times)
+
+print(len(spike_times))
+
 # Integral usando sumas de Riemann
 rate_integral_riemann = np.zeros_like(t)
 intervalos = t[1] - t[0]
 for i in range(1, len(t)):
-    rate_integral_riemann[i] = rate_integral_riemann[i - 1] + rate[i - 1] * intervalos
+    rate_integral_riemann[i] = rate_integral_riemann[i-1] + rate[i - 1] * intervalos
 
-spike_trains = []
-for trial in range(num_trials):
+
+
+'''for trial in range(num_trials):
     spike_times = []
     for i in range(len(t)):
         if np.random.rand() < rate[i] / lambda_rate:
             spike_times.append(t[i])
-    spike_trains.append(spike_times)
 
-plt.figure(figsize=(10, 12))
-plt.subplot(6, 1, 1)
+    spike_trains.append(spike_times)'''
+
+
+
+
+na_times, na_values = nelson(spike_trains[0]) 
+
+
+interpolado = suavizado(t, na_times, na_values)
+
+
+plt.figure(figsize=(12, 24))
+plt.subplots_adjust(hspace=1.0)
+plt.subplot(7, 1, 1)
 plt.plot(t, gauss_values, label='Gaussiana')
 plt.title('Filtro')
 plt.grid(True)
 
-plt.subplot(6, 1, 2)
+plt.subplot(8, 1, 2)
 plt.plot(t, estimulo_values, label='Estimulo', color='red')
 plt.title('Estimulo')
 plt.grid(True)
 
-plt.subplot(6, 1, 3)
+plt.subplot(8, 1, 3)
 plt.plot(t, normalized_response, label='Convolución Normalizada', color='purple')
 plt.title('Respuesta Lineal Normalizada')
 plt.grid(True)
 
-plt.subplot(6, 1, 4)
+plt.subplot(8, 1, 4)
 plt.plot(t, rate, label='Rate (Hz)', color='green')
 plt.title('Rate (Hz)')
 plt.grid(True)
 
-plt.subplot(6, 1, 5)
+plt.subplot(8, 1, 5)
 plt.plot(t, rate_integral_riemann, label='Integral del Rate (Riemann)', color='blue')
 plt.title('Integral del Rate (Suma de Riemann)')
 plt.grid(True)
 
-plt.subplot(6, 1, 6)
+plt.subplot(8, 1, 6)
 for trial, spike_times in enumerate(spike_trains):
     plt.scatter(spike_times, np.ones_like(spike_times) * trial, color='black', s=10)
-plt.xlabel('Tiempo (s)')
+
 plt.ylabel('Ensayo')
 plt.title('Spikes')
 plt.ylim([-1, num_trials])
 plt.grid(True)
+
+plt.subplot(8, 1, 7)
+plt.step(na_times, na_values, where='post', label='Nelson-Aalen', color='orange')
+
+plt.ylabel('H(t)')
+plt.title('Nelson-Aalen')
+plt.grid(True)
+plt.legend()
+
+plt.subplot(8, 1, 8)
+plt.step(t, interpolado, where='post', label='Nelson-Aalen', color='orange')
+
+plt.ylabel('H(t)')
+plt.title('Nelson-Aalen-suavizado')
+plt.grid(True)
+plt.legend()
+
 
 plt.tight_layout()
 plt.show()

@@ -1,33 +1,44 @@
-import pandas as  pd
-import matplotlib.pyplot as plt
+import pandas as pd
 import os
-
-# Cargar el DataFrame actualizado
-df = pd.read_csv('dosclusters''.csv')
-df_copy=df
-
-# Obtener los valores únicos de clusters
-unique_clusters1 = df['clusters_mean_isi_spike'].unique()
-unique_clusters2 = df['clusters_isi'].unique()
-unique_clusters3 = df['clusters_spike'].unique()
+import time  # Para medir el tiempo de ejecución
 
 
+start_time = time.time()
 
-# Definir una carpeta para guardar los archivos
-output_folder = input("Ingrese el nombre de la carpeta: ")
-os.makedirs(output_folder, exist_ok=True)  # Crea la carpeta si no existe
+# Leer la ruta de salida desde el archivo generado
+with open("output_path.txt") as f:
+    output_folder = f.read().strip()
 
-# Guardar archivos en la carpeta correspondiente
-for cluster in unique_clusters1:  
-    filtered_df = df_copy[df_copy['clusters_mean_isi_spike'] == cluster][['filter', 'clusters_mean_isi_spike','clusters_isi','clusters_spike']]
-    filtered_df.to_csv(os.path.join(output_folder, f'mean_{cluster}.csv'), index=False)
+ruta_archivo = os.path.join(output_folder, "clusterizado.csv")
+# === Cargar datos ===
+df = pd.read_csv(ruta_archivo)
 
-for cluster in unique_clusters2:  
-    filtered_df = df_copy[df_copy['clusters_isi'] == cluster][['filter', 'clusters_mean_isi_spike','clusters_isi','clusters_spike']]
-    filtered_df.to_csv(os.path.join(output_folder, f'isi_{cluster}.csv'), index=False)
+# === Crear carpeta si no existe ===
+os.makedirs(output_folder, exist_ok=True)
 
-for cluster in unique_clusters3:  
-    filtered_df = df_copy[df_copy['clusters_spike'] == cluster][['filter', 'clusters_mean_isi_spike','clusters_isi','clusters_spike']]
-    filtered_df.to_csv(os.path.join(output_folder, f'spike_{cluster}.csv'), index=False)
+# === Guardar archivos por cluster, mostrando SOLO la métrica correspondiente ===
 
-print(f"Todos los archivos se han guardado en la carpeta: {output_folder}")
+# 1. Mean ISI-SPIKE
+df[['filter', 'clusters_mean_isi_spike']].to_csv(os.path.join(output_folder, 'mean_isi_spike.csv'), index=False)
+
+# 2. ISI
+df[['filter', 'clusters_isi']].to_csv(os.path.join(output_folder, 'isi.csv'), index=False)
+
+# 3. SPIKE
+df[['filter', 'clusters_spike']].to_csv(os.path.join(output_folder, 'spike.csv'), index=False)
+
+# 4. Área sin suavizado (NA)
+df[['filter', 'clusters_NA']].to_csv(os.path.join(output_folder, 'area1.csv'), index=False)
+
+# 5. Área con suavizado (NA suavizado)
+df[['filter', 'clusters_NA_suavizado']].to_csv(os.path.join(output_folder, 'area2.csv'), index=False)
+
+print(f"✅ Archivos separados correctamente por métrica y cluster en: {output_folder}")
+
+
+# Medir el tiempo final
+end_time = time.time()
+
+# Mostrar el tiempo de ejecución
+execution_time = end_time - start_time
+print(f"El código tomó {execution_time:.2f} segundos en ejecutarse.")
