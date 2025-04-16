@@ -3,12 +3,17 @@ import pandas as pd
 from scipy.stats import norm
 import time  # Para medir el tiempo de ejecución
 
+
+
 # Ajustar parámetros para r(x)
 r_min = 0.5
 r_max = 100
 c = 4
 lambda_rate = 200
 times = 1000
+
+
+
 
 # Parámetros para los ensayos (Spikes)
 num_trials_per_filter = 10
@@ -71,7 +76,7 @@ spike_data = []
 
 # Medir el tiempo de inicio
 start_time = time.time()
-
+delta=t[1]-t[0]
 # Iterar sobre cada filtro en el diccionario
 for filter_name, params in filters_params.items():
     p = params['p']
@@ -93,13 +98,22 @@ for filter_name, params in filters_params.items():
     # Calcular el rate basado en la convolución normalizada
     rate = np.array([r_function(j) for j in normalized_response])
 
+
+
     # Simular tren de spikes para cada ensayo
     for trial in range(num_trials_per_filter):
-        spike_times = [filter_name]  # Iniciar la lista de tiempos con el nombre del filtro
-        for i in range(len(t)):
-            if np.random.rand() < rate[i] / lambda_rate:
-                spike_times.append(t[i])  # Almacenar el tiempo en lugar de la posición
-        spike_data.append(spike_times)  # Añadir los tiempos de este ensayo
+        x=np.random.poisson(lam=21.5*lambda_rate,size=1)
+        y=np.random.uniform(low=0,high=21.5,size=x)
+        spike_times=[]
+        for i in range(0,len(y)):
+            if np.random.rand() < rate[int(y[i]/delta)]/lambda_rate:
+                spike_times.append(t[int(y[i]/delta)]) 
+        spike_times = np.sort(list(set(spike_times)))  # elimina duplicados
+        spike_data.append([filter_name] + list(spike_times))  
+
+
+
+
 
 # Convertir a DataFrame y guardar en CSV
 max_spikes = max(len(trial) for trial in spike_data)  # Encontrar el máximo de spikes
