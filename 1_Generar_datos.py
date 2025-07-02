@@ -16,7 +16,9 @@ times = 1000
 
 
 # Parámetros para los ensayos (Spikes)
-num_trials_per_filter = 100
+num_trials_per_filter = 5
+VARIABILIDAD_PORCENTAJE = 0.0  # Este valor se actualizará desde main_pipeline.py
+
 
 # Definir las combinaciones posibles de parámetros en un diccionario
 filters_params = {
@@ -79,9 +81,14 @@ start_time = time.time()
 delta=t[1]-t[0]
 # Iterar sobre cada filtro en el diccionario
 for filter_name, params in filters_params.items():
+
     p = params['p']
-    l = params['l']
-    v = params['v']
+    l_mean = params['l']
+    v_mean = params['v']
+
+    # Aplicar variabilidad gaussiana (con valor absoluto para evitar negativos)
+    l = np.abs(np.random.normal(loc=l_mean, scale=(VARIABILIDAD_PORCENTAJE / 100) * l_mean))
+    v = np.abs(np.random.normal(loc=v_mean, scale=(VARIABILIDAD_PORCENTAJE / 100) * v_mean))
 
     # Evaluar las funciones gauss y estimulo en ese dominio
     gauss_values = gauss(p, t, 0, l, v)
@@ -109,7 +116,7 @@ for filter_name, params in filters_params.items():
             if np.random.rand() < rate[int(y[i]/delta)]/lambda_rate:
                 spike_times.append(t[int(y[i]/delta)]) 
         spike_times = np.sort(list(set(spike_times)))  # elimina duplicados
-        spike_data.append([filter_name] + list(spike_times))  
+        spike_data.append([filter_name, l, v] + list(spike_times))  
 
 
 
@@ -117,8 +124,8 @@ for filter_name, params in filters_params.items():
 
 # Convertir a DataFrame y guardar en CSV
 max_spikes = max(len(trial) for trial in spike_data)  # Encontrar el máximo de spikes
-spike_df = pd.DataFrame([trial + [None] * (max_spikes - len(trial)) for trial in spike_data])  # agregar valores none
-spike_df.columns = ["filter"] + [f"time_{i}" for i in range(1, max_spikes)]  # Nombrar las columnas
+spike_df = pd.DataFrame([trial + [None] * (max_spikes - len(trial) + 2) for trial in spike_data])
+spike_df.columns = ["filter", "l", "v"] + [f"time_{i}" for i in range(1, max_spikes)]
 spike_df.to_csv("spike_trains.csv", index=False)
 
 # Medir el tiempo final
