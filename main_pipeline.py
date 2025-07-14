@@ -125,6 +125,14 @@ if os.path.exists(fourier_file):
 else:
     raise FileNotFoundError(f"❌ No se encontró el archivo {fourier_file}. Revisa 2.2_Fourier_dist_optimizada.py.")
 
+# === PASO 2.3: Wavelet distancia ===
+print("Ejecutando 2.3_Wavelet_dist.py...")
+shutil.copy(os.path.join(output_folder, "spike_trains.csv"), "spike_trains.csv")
+subprocess.run(["python", "2.3_Wavelet_dist.py"])
+# Mover archivos generados a la carpeta de resultados
+for fname in ["wavalet_matriz.csv"]:
+    shutil.move(fname, os.path.join(output_folder, fname))
+
 # === PASO 4: Clustering + Dendrogramas ===
 print("Ejecutando 3_Generar_clustering.py...")
 
@@ -134,7 +142,7 @@ with open("cluster_input.txt", "w") as f:
 
 # Copiar los archivos necesarios al directorio actual
 shutil.copy(os.path.join(output_folder, "spike_trains.csv"), "spike_trains.csv")
-for fname in ["matriz_distancia.csv", "matriz_ISI.csv", "matriz_SPIKE.csv", "areav1.csv", "areav2.csv", "fourier_opt_matriz.csv"]:
+for fname in ["matriz_distancia.csv", "matriz_ISI.csv", "matriz_SPIKE.csv", "areav1.csv", "areav2.csv", "fourier_opt_matriz.csv","wavalet_matriz.csv"]:
     shutil.copy(os.path.join(output_folder, fname), fname)
 
 # Ejecutar clustering
@@ -144,7 +152,7 @@ with open("cluster_input.txt", "r") as f:
 
 
 # Mover imágenes de dendrogramas
-for fname in ["dendro_mean_isi_spike.png", "dendro_isi.png", "dendro_spike.png", "dendro_area1.png", "dendro_area2.png", "dendro_fourier_opt.png"]:
+for fname in ["dendro_mean_isi_spike.png", "dendro_isi.png", "dendro_spike.png", "dendro_area1.png", "dendro_area2.png", "dendro_fourier_opt.png","dendro_wavelet.png"]:
     if os.path.exists(fname):
         shutil.move(fname, os.path.join(output_folder, fname))
 
@@ -155,7 +163,7 @@ print("Ejecutando 4_Analizar_clusters.py...")
 subprocess.run(["python", "4_Analizar_clusters.py"])
 
 # === LIMPIEZA  ===
-for fname in ["cluster_input.txt", "spike_trains.csv", "matriz_distancia.csv", "matriz_ISI.csv", "matriz_SPIKE.csv", "areav1.csv", "areav2.csv","fourier_opt_matriz.csv"]:
+for fname in ["cluster_input.txt", "spike_trains.csv", "matriz_distancia.csv", "matriz_ISI.csv", "matriz_SPIKE.csv", "areav1.csv", "areav2.csv","fourier_opt_matriz.csv","wavalet_matriz.csv"]:
     if os.path.exists(fname):
         os.remove(fname)
 
@@ -197,7 +205,30 @@ else:
     print("📁 Archivos .csv intermedios conservados.")
 
 
+# === GENERAR RESUMEN AUTOMÁTICO ===
+from datetime import datetime
 
+resumen_path = os.path.join(output_folder, "resumen_final.md")
+graficos_incluir = [
+    "comparacion_score_promedio_ward.png",
+    "heatmaps_distancias_comparativos.png",
+    "heatmaps_cluster_vs_filter_ward.png",
+    "metricas_comparativas_ward.png"
+]
 
+with open(resumen_path, "w", encoding="utf-8") as f:
+    f.write(f"# 📊 Resumen de Clustering\n")
+    f.write(f"**Fecha de generación:** {datetime.now()}\n\n")
+    f.write(f"Carpeta de resultados: `{output_folder}`\n\n")
+    
+    for grafico in graficos_incluir:
+        path_img = grafico.replace("\\", "/")
+        if os.path.exists(os.path.join(output_folder, grafico)):
+            f.write(f"## {grafico.replace('.png','').replace('_',' ').title()}\n")
+            f.write(f"![{grafico}]({path_img})\n\n")
+        else:
+            f.write(f"⚠️ **Gráfico no encontrado:** {grafico}\n\n")
+
+print(f"✅ Resumen generado en: {resumen_path}")
 print(f"\n🎉 Proceso completo. Revisa la carpeta: {output_folder}")
 

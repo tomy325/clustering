@@ -28,7 +28,9 @@ def analizar_clusterizado(ruta_cluster):
         "spike": f"clusters_spike_{nombre_metodo}",
         "area1": f"clusters_NA_{nombre_metodo}",
         "area2": f"clusters_NA_suavizado_{nombre_metodo}",
-        "fourier_opt": f"clusters_fourier_opt_{nombre_metodo}"
+        "fourier_opt": f"clusters_fourier_opt_{nombre_metodo}",
+        "wavelet": f"clusters_wavelet_{nombre_metodo}"
+
     }
 
     # Guardar archivos individuales
@@ -176,10 +178,11 @@ mats = {
     "SPIKE Distance": "matriz_SPIKE.csv",
     "Área sin suavizar": "areav1.csv",
     "Área suavizada": "areav2.csv",
-    "Fourier Optimizada": "fourier_opt_matriz.csv"
+    "Fourier Optimizada": "fourier_opt_matriz.csv",
+    "Wavelet Distance": "wavalet_matriz.csv"
 }
 
-fig, axs = plt.subplots(2, 3, figsize=(18, 12))
+fig, axs = plt.subplots(2, 4, figsize=(18, 12))
 for ax, (titulo, archivo) in zip(axs.flat, mats.items()):
     m = pd.read_csv(os.path.join(output_folder, archivo))
     sns.heatmap(m, ax=ax, cmap="viridis", square=True, cbar=True, xticklabels=False, yticklabels=False)

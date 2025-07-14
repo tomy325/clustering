@@ -37,6 +37,7 @@ a1 = pd.read_csv('areav1.csv')
 a2 = pd.read_csv('areav2.csv')
 df = pd.read_csv('spike_trains.csv')
 fourier_opt = pd.read_csv("fourier_opt_matriz.csv")
+wavelet_matriz=pd.read_csv("wavalet_matriz.csv")
 
 
 # === INPUT DE NÚMERO DE CLUSTERS ===
@@ -63,6 +64,9 @@ for method in methods:
     dendograma(fourier_opt, method=method, save_path=f"dendro_fourier_opt_{method}.png")
     clusters6 = hierarchical(fourier_opt, num_clusters, method=method)
 
+    dendograma(wavelet_matriz, method=method, save_path=f"dendro_wavelet_{method}.png")
+    clusters7 = hierarchical(wavelet_matriz, num_clusters, method=method)
+
     # Guardar resultados con nombre específico por método
     file_name = f"clusterizado_{method}.csv"
     df_temp = df.copy()
@@ -72,6 +76,7 @@ for method in methods:
     df_temp[f'clusters_NA_{method}'] = clusters4
     df_temp[f'clusters_NA_suavizado_{method}'] = clusters5
     df_temp[f'clusters_fourier_opt_{method}'] = clusters6
+    df_temp[f'clusters_wavelet_{method}'] = clusters7
     df_temp.to_csv(file_name, index=False)
 
 
