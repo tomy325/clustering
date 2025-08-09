@@ -7,8 +7,10 @@ with open("haar_config.txt", "r") as f:
 
 # Leer spike trains
 df = pd.read_csv("spike_trains.csv")
-neurons = df.drop(columns='filter', errors='ignore').values
+neurons = df.drop(columns=["filter", "l", "v"], errors='ignore').values
 num_trains = len(neurons)
+
+
 
 # Función base Haar φ(x)
 def haar_phi(x):

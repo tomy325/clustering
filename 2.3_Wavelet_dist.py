@@ -14,7 +14,7 @@ with open("haar_config.txt", "r") as f:
 
 # === CARGA DE DATOS ===
 df = pd.read_csv("spike_trains.csv")
-neurons = df.drop(columns='filter', errors='ignore').values
+neurons = df.drop(columns=["filter", "l", "v"], errors='ignore').values
 num_trains = len(neurons)
 
 # === FUNCIONES ===

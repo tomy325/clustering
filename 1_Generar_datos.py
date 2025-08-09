@@ -16,8 +16,8 @@ times = 1000
 
 
 # Parámetros para los ensayos (Spikes)
-num_trials_per_filter = 25
-VARIABILIDAD_PORCENTAJE = 5.0  # Este valor se actualizará desde main_pipeline.py
+num_trials_per_filter = 13
+VARIABILIDAD_PORCENTAJE = 0.0  # Este valor se actualizará desde main_pipeline.py
 
 
 # Definir las combinaciones posibles de parámetros en un diccionario
@@ -82,6 +82,8 @@ spike_data = []
 # Medir el tiempo de inicio
 start_time = time.time()
 delta=t[1]-t[0]
+estimulo_values = np.array([estimulo(i) for i in t])  # se puede precomputar 1 vez
+
 # Iterar sobre cada filtro en el diccionario
 for filter_name, params in filters_params.items():
 
@@ -89,38 +91,38 @@ for filter_name, params in filters_params.items():
     l_mean = params['l']
     v_mean = params['v']
 
-    # Aplicar variabilidad gaussiana (con valor absoluto para evitar negativos)
-    l = np.abs(np.random.normal(loc=l_mean, scale=(VARIABILIDAD_PORCENTAJE / 100) * l_mean))
-    v = np.abs(np.random.normal(loc=v_mean, scale=(VARIABILIDAD_PORCENTAJE / 100) * v_mean))
-
-    # Evaluar las funciones gauss y estimulo en ese dominio
-    gauss_values = gauss(p, t, 0, l, v)
-    estimulo_values = np.array([estimulo(i) for i in t])
-
-    # Realizar la convolución manual
-    response = linear_response(gauss_values, estimulo_values)
-
-    # Normalizar la respuesta entre -1 y 1
-    response_min = np.min(response)
-    response_max = np.max(response)
-    normalized_response = (response - response_min) / (response_max - response_min) * 2 - 1
-
-    # Calcular el rate basado en la convolución normalizada
-    rate = np.array([r_function(j) for j in normalized_response])
-
-
-
-    # Simular tren de spikes para cada ensayo
+    # Cada fila será una "neurona" distinta: muestrea l y v por trial
     for trial in range(num_trials_per_filter):
-        x=np.random.poisson(lam=21.5*lambda_rate,size=1)
-        y=np.random.uniform(low=0,high=21.5,size=x)
-        spike_times=[]
-        for i in range(0,len(y)):
-            if np.random.rand() < rate[int(y[i]/delta)]/lambda_rate:
-                spike_times.append(t[int(y[i]/delta)]) 
-        spike_times = np.sort(list(set(spike_times)))  # elimina duplicados
-        spike_data.append([filter_name, l, v] + list(spike_times))  
 
+        # 1) muestrear l y v por "neurona"
+        l = np.abs(np.random.normal(loc=l_mean, scale=(VARIABILIDAD_PORCENTAJE / 100) * l_mean))
+        v = np.abs(np.random.normal(loc=v_mean, scale=(VARIABILIDAD_PORCENTAJE / 100) * v_mean))
+
+        # 2) calcular filtro gauss con estos l, v
+        gauss_values = gauss(p, t, 0, l, v)
+
+        # 3) convolución 
+        response = linear_response(gauss_values, estimulo_values)
+
+
+        # 4) normalizar y rate
+        response_min = np.min(response)
+        response_max = np.max(response)
+        normalized_response = (response - response_min) / (response_max - response_min) * 2 - 1
+        rate = np.array([r_function(j) for j in normalized_response])
+
+        # 5) generar spikes Poisson con el mismo esquema que ya usas
+        x = np.random.poisson(lam=21.5 * lambda_rate, size=1)
+        y = np.random.uniform(low=0, high=21.5, size=x)
+        delta = t[1] - t[0]
+        spike_times = []
+        for i in range(0, len(y)):
+            if np.random.rand() < rate[int(y[i] / delta)] / lambda_rate:
+                spike_times.append(t[int(y[i] / delta)])
+        spike_times = np.sort(list(set(spike_times)))  # elimina duplicados
+
+        # 6) guardar fila (cada fila = 1 "neurona" de este tipo)
+        spike_data.append([filter_name, l, v] + list(spike_times))
 
 
 

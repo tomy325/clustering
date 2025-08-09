@@ -7,7 +7,7 @@ import time
 start_time = time.time()
 
 # Leer los datos del CSV, omitiendo la columna de nombre del filtro
-spike_trains_df = pd.read_csv("spike_trains.csv").drop(columns=["filter"])
+spike_trains_df = pd.read_csv("spike_trains.csv").drop(columns=["filter", "l", "v"])
 num_trains = spike_trains_df.shape[0]
 
 # Convertir cada fila en una lista de spikes (sin NaN)

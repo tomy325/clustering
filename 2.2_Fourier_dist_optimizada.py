@@ -8,8 +8,9 @@ with open("fourier_config.txt", "r") as f:
     N = int(f.read().strip())  # J = K
 
 # ======================= CARGA DE DATOS =======================
-df = pd.read_csv("spike_trains.csv")
-neurons = df.drop(columns=['filter']).values
+df = pd.read_csv("spike_trains.csv") 
+neurons = df.drop(columns=["filter", "l", "v"]).values
+
 num_neurons = len(neurons)
 
 # ======================= FUNCIONES AUXILIARES =======================
