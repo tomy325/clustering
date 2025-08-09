@@ -16,8 +16,8 @@ times = 1000
 
 
 # Parámetros para los ensayos (Spikes)
-num_trials_per_filter = 5
-VARIABILIDAD_PORCENTAJE = 0.0  # Este valor se actualizará desde main_pipeline.py
+num_trials_per_filter = 25
+VARIABILIDAD_PORCENTAJE = 5.0  # Este valor se actualizará desde main_pipeline.py
 
 
 # Definir las combinaciones posibles de parámetros en un diccionario
@@ -29,7 +29,10 @@ filters_params = {
     'ON_fast_transient': {'p': 1, 'l': 0.4, 'v': 0.65},
     'OF_fast_transient': {'p': -1, 'l': 0.4, 'v': 0.65},
     'ON_slow_transient': {'p': 1, 'l': 1, 'v': 0.65},
-    'OF_slow_transient': {'p': -1, 'l': 1, 'v': 0.65}
+    'OF_slow_transient': {'p': -1, 'l': 1, 'v': 0.65},
+    #'test_like_nfs': {'p': 0.8, 'l': 0.6, 'v': 1}, #parecido a on_fast_sustained
+    #'test_like_fft': {'p': -0.8, 'l': 0.6, 'v': 0.8},#parecido a of_fast_transient
+    #'test_like_nst': {'p': 0.8, 'l': 0.8, 'v': 0.8}#parecido a on_slow_transient
 }
 
 # Función r(x)
@@ -133,4 +136,4 @@ end_time = time.time()
 
 # Mostrar el tiempo de ejecución
 execution_time = end_time - start_time
-print(f"El código tomó {execution_time:.2f} segundos en ejecutarse.")
+print(f"Generar datos tardo {execution_time:.2f} segundos en ejecutarse.")
