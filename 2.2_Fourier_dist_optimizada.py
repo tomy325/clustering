@@ -14,7 +14,7 @@ num_neurons = len(neurons)
 
 # ======================= FUNCIONES AUXILIARES =======================
 def compute_phi_psi(spike_train, N):
-    spike_train = spike_train[~np.isnan(spike_train)]
+    spike_train = spike_train[~np.isnan(spike_train)]/21.5
     phi = np.array([np.sum(np.sin(np.pi * spike_train * j)) for j in range(1, N + 1)])
     psi = np.array([np.sum(np.cos(np.pi * spike_train * k)) for k in range(1, N + 1)])
 
